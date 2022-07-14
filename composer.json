@@ -1,0 +1,24 @@
+{
+    "name": "iboxs/basic",
+    "description": "PHP basic method package",
+    "type": "1",
+    "license": "MIT",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "zqu",
+            "email": "zqu1016@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "iboxs\\basic\\": "src/"
+        }
+    }
+}
