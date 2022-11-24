@@ -48,7 +48,7 @@ use iboxs\basic\lib\Base;
  * @method static bool is_ip($str) 判断字符串是否是IP地址（支持IPv6）
  * 
  */
-class Client
+class Basic
 {
     // 调用实际类的方法
     public static function __callStatic($method, $params)
