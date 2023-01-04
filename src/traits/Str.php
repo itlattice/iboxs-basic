@@ -20,6 +20,30 @@ trait Str
         return $randStr;
     }
 
+    public function phoneHandle($mobile){
+        if(strlen($mobile)<8){
+            return substr($mobile,0,3)."**";
+        }
+        $head=substr($mobile,0,3);
+        $foot=substr($mobile,strlen($mobile)-4,4);
+        $len=strlen($mobile)-7;
+        $center=str_pad('',$len,'*');
+        return $head.$center.$foot;
+    }
+
+    public function chunkSplit($string, $length, $end="\n", $once = false){
+        $array = array();
+        $strlen = mb_strlen($string);
+        while($strlen){
+            $array[] = mb_substr($string, 0, $length, "utf-8");
+            if($once)
+                return $array[0] . $end;
+            $string = mb_substr($string, $length, $strlen, "utf-8");
+            $strlen = mb_strlen($string);
+        }
+        return implode($end, $array);
+    }
+
     /**
      * 判断字符串是否是序列化后的数据
      * @param mixed $data 需判断的字符串
@@ -476,5 +500,21 @@ trait Str
         } else {
             return false;
         }
+    }
+
+    public function isEmpty($value){
+        if($value===null){
+            return true;
+        }
+        if(is_numeric($value)){
+            return false;
+        }
+        if(is_array($value)){
+            return false;
+        }
+        if(is_string($value)&&$value==''){
+            return true;
+        }
+        return false;
     }
 }
