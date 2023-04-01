@@ -1,7 +1,7 @@
 <?php
 /**
  * PHP基本函数包
- * @author  zqu zqu1016@qq.com
+ * @author  zqu zqu1016@qq.com QQ:320587491
  */
 namespace iboxs\basic;
 
@@ -47,8 +47,8 @@ use iboxs\basic\lib\Base;
  * @method static bool is_domain($domain) 判断网址是否是domain
  * @method static bool is_ip($str) 判断字符串是否是IP地址（支持IPv6）
  * @method static bool isEmpty($val) 判断是否是空值
- * @method static string phoneHandle($phone) 将电话号码中间位置隐藏一部分
- * @method static string chunkSplit($string, $length, $end="\n", $once = false) 字符串按位置分离
+ * @method static bool isDate($str) 判断字符串是否是日期
+ * @method static int sameStr($str1,$str2) 输出字符串1与字符串2的相同字符数
  */
 class Basic
 {

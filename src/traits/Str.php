@@ -20,6 +20,17 @@ trait Str
         return $randStr;
     }
 
+    public function sameStr($str1,$str2){
+        $len=mb_strlen($str1);
+        $count=0;
+        for($i=1;$i<$len+1;$i++){
+            if(mb_substr($str1,0,$i)==mb_substr($str2,0,$i)){
+                $count=$i;
+            }
+        }
+        return $count;
+    }
+
     public function phoneHandle($mobile){
         if(strlen($mobile)<8){
             return substr($mobile,0,3)."**";
@@ -29,6 +40,21 @@ trait Str
         $len=strlen($mobile)-7;
         $center=str_pad('',$len,'*');
         return $head.$center.$foot;
+    }
+
+    public function isDate($date)
+    {
+        //匹配日期格式
+        if (preg_match ("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date, $parts))
+        {
+            //检测是否为日期,checkdate为月日年
+            if(checkdate($parts[2],$parts[3],$parts[1]))
+                return true;
+            else
+                return false;
+        }
+        else
+            return false;
     }
 
     public function chunkSplit($string, $length, $end="\n", $once = false){
@@ -83,7 +109,7 @@ trait Str
      */
     public function isPhone(string $str): bool
     {
-        if (preg_match("/^1[34578]\d{9}$/", $str)) {
+        if (preg_match("/^1[3456789]\d{9}$/", $str)) {
             return true;
         } else {
             return false;
@@ -212,12 +238,14 @@ trait Str
      * @param $save_to 保存位置+文件名称
      * @return void
      */
-    public function downLoadFile($file_url, $save_to)
+    public function downLoadFile($file_url, $save_to,$header=[])
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, 0);
         curl_setopt($ch, CURLOPT_URL, $file_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        // curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
         $file_content = curl_exec($ch);
         curl_close($ch);
         $downloaded_file = fopen($save_to, 'w');
