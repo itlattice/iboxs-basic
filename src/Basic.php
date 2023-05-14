@@ -55,6 +55,7 @@ use iboxs\basic\lib\Base;
  * @method static array getValue(array $data) 字典转为普通数组
  * @method static bool isDate($str) 判断字符串是否是日期
  * @method static int sameStr($str1,$str2) 输出字符串1与字符串2的相同字符数
+ * @method static int isJson($str) 判断字符串是否是JSON
  */
 class Basic
 {

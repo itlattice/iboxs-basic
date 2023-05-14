@@ -3,6 +3,12 @@ namespace iboxs\basic\traits;
 trait Str
 {
     /**
+     * 判断字符串是否是JSON
+     */
+    public function isJson($str){
+        return (!is_null(json_decode($str)));
+    }
+    /**
      * 获取随机字符串
      * @param int $length 随机字符串长度
      * @return string
