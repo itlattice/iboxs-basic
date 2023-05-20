@@ -1,5 +1,9 @@
 <?php
 namespace iboxs\basic\traits;
+
+use DateTime;
+use DateTimeZone;
+
 trait Str
 {
     /**
