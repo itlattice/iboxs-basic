@@ -30,6 +30,24 @@ trait Http
         return $host;
     }
 
+    public function sendJson($url,$data,&$httpCode=200){
+        $jsonStr=json_encode($data,JSON_UNESCAPED_UNICODE);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonStr);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json; charset=utf-8',
+                'Content-Length: ' . strlen($jsonStr)
+            )
+        );
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        return $response;
+    }
+
     /**
      * 简单发起post请求(更多请求方式或请求需要可安装：composer require iboxs/http)
      * @param $url
