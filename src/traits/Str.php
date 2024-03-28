@@ -1,5 +1,8 @@
 <?php
 namespace iboxs\basic\traits;
+
+use DateTime;
+use DateTimeZone;
 trait Str
 {
     /**
@@ -25,6 +28,30 @@ trait Str
         }
         return $randStr;
     }
+
+    public function delEmoji($str){
+        if(is_array($str)){
+            foreach($str as $key=>$val){
+                $str[$key] = $this->delEmoji($val);
+            }
+            return $str;
+        }
+        if(is_numeric($str)){
+            return $str;
+        }
+        if(is_bool($str)){
+            return $str;
+        }
+        if(is_object($str)){
+            return $str;
+        }
+        $mbLen = mb_strlen($str); $strArr = [];
+        for ($i = 0; $i < $mbLen; $i++) { $mbSubstr = mb_substr($str, $i, 1, 'utf-8');
+        if (strlen($mbSubstr) >= 4) { continue; } $strArr[] = $mbSubstr; } 
+        $str=implode('', $strArr);
+        return mb_convert_encoding($str, "UTF-8");
+    }
+
 
     public function sameStr($str1,$str2){
         $len=mb_strlen($str1);
@@ -108,16 +135,49 @@ trait Str
         return false;
     }
 
+    public function isChinesePhone($str): bool
+    {
+        if($this->isEmpty($str)){
+            return false;
+        }
+        return preg_match("/^1[3456789]\d{9}$/", $str)||preg_match("/^\+861[3456789]\d{9}$/", $str);
+    }
+
     /**
      * 判断字符串是否是手机号
      * @param string $str 字符串
      * @return bool
      */
-    public function isPhone(string $str): bool
+    public function isPhone($str): bool
     {
-        if (preg_match("/^1[3456789]\d{9}$/", $str)) {
+        if($this->isEmpty($str)){
+            return false;
+        }
+        if (preg_match("/^\+861[3456789]\d{9}$/", $str) || preg_match("/^1[3456789]\d{9}$/", $str)) { //普通大陆手机号
             return true;
         } else {
+            if (preg_match('/^0\d{2,3}-\d{6,8}$/', $str)||preg_match('/^400(-\d{3,4}){2}$/', $str)) { //含区号的座机号码
+                return true;
+            }
+            if (preg_match('/400-\d{3,4}-\d{2,4}/', $str)) { //400号码
+                return true;
+            }
+            $str=str_replace('-','',$str);
+            if (preg_match('#^(852)\d{7,9}$#', $str)) {//香港号码含区号
+                return true;
+            }
+            if (preg_match('#^(851)\d{7,9}$#', $str)) { //澳门号码含区号
+                return true;
+            }
+            if (preg_match('#^(\+852)\d{7,9}$#', $str)) {//香港号码含区号
+                return true;
+            }
+            if (preg_match('#^(\+851)\d{7,9}$#', $str)) { //澳门号码含区号
+                return true;
+            }
+            if (preg_match('#^[6|9|5|8]\d{7,8}$#', $str)) { //香港/澳门号码（无区号）
+                return true;
+            }
             return false;
         }
     }
@@ -191,7 +251,14 @@ trait Str
         $ver = str_replace("V", "", $ver);
         $arr = explode(".", $ver);
         $kstr = "";
-        foreach ($arr as $k) {
+        if(count($arr)<3){
+            for($i=0;$i<3-count($arr);$i++){
+                $ver.='.0';
+            }
+            return $this->GetVerId($ver);
+        }
+        for($j=0;$j<3;$j++){
+            $k=$arr[$j];
             if (strlen($k) < 4) {
                 $len = 4 - strlen($k);
                 for ($i = 0; $i < $len; $i++) {
@@ -199,6 +266,16 @@ trait Str
                 }
             }
             $kstr .= $k;
+        }
+        if(count($arr)==4){
+            $k=$arr[3];
+            if (strlen($k) < 4) {
+                $len = 4 - strlen($k);
+                for ($i = 0; $i < $len; $i++) {
+                    $k = "0" . $k;
+                }
+            }
+            $kstr.='.'.$k;
         }
         return $kstr;
     }
@@ -236,6 +313,16 @@ trait Str
             if ($vSum % 11 != 1) return false;
         }
         return true;
+    }
+
+    public function create_uuid() {
+        $chars = md5(uniqid(mt_rand(), true));
+        $uuid = substr ( $chars, 0, 8 ) . '-'
+            . substr ( $chars, 8, 4 ) . '-'
+            . substr ( $chars, 12, 4 ) . '-'
+            . substr ( $chars, 16, 4 ) . '-'
+            . substr ( $chars, 20, 12 );
+        return $uuid ;
     }
 
     /**

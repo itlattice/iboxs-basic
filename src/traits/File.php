@@ -31,6 +31,7 @@ trait File
         return false;
     }
 
-
-
+    public function getFileExt($file){
+        return pathinfo($file)['extension']??'';
+    }
 }
