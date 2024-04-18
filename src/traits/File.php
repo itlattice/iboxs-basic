@@ -34,4 +34,9 @@ trait File
     public function getFileExt($file){
         return pathinfo($file)['extension']??'';
     }
+
+    public function getFileNameExt($file){
+        $arr=explode('.',$file);
+        return $arr[count($arr)-1];
+    }
 }
