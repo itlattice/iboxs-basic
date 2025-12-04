@@ -30,24 +30,6 @@ trait Http
         return $host;
     }
 
-    public function sendJson($url,$data,&$httpCode=200){
-        $jsonStr=json_encode($data,JSON_UNESCAPED_UNICODE);
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonStr);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json; charset=utf-8',
-                'Content-Length: ' . strlen($jsonStr)
-            )
-        );
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        return $response;
-    }
-
     /**
      * 简单发起post请求(更多请求方式或请求需要可安装：composer require iboxs/http)
      * @param $url
@@ -114,12 +96,43 @@ trait Http
      */
     public function is_weixin()
     {
-        if (strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
+        if (str_contains($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
             return true;
         }
         return false;
     }
 
+    public function isAlipayWeb()
+    {
+        $userAgent =$this->GetBrowser();
+        return stripos($userAgent, 'AlipayClient') !== false;
+    }
+
+    /**
+     * 判断是否来自手机请求
+     */
+    public function isMobileBrowser(){
+        $userAgent =$this->GetBrowser();
+        $mobileDevices = [
+            '/android/i',
+            '/webos/i',
+            '/iphone/i',
+            '/ipad/i',
+            '/ipod/i',
+            '/blackberry/i',
+            '/iemobile/i',
+            '/opera mini/i',
+            '/mobile/i'
+        ];
+    
+        foreach ($mobileDevices as $device) {
+            if (preg_match($device, $userAgent)) {
+                return true;
+            }
+        }
+    
+        return false;
+    }
 
     /**
      * 获得访问者浏览器语言
@@ -149,21 +162,21 @@ trait Http
    public function get_os($agent)
     {
         $agent = strtolower($agent);
-        if (strpos($agent, 'windows nt')) {
+        if (str_contains($agent, 'windows nt')) {
             $platform = 'windows';
-        } elseif (strpos($agent, 'macintosh')) {
+        } elseif (str_contains($agent, 'macintosh')) {
             $platform = 'mac';
-        } elseif (strpos($agent, 'ipod')) {
+        } elseif (str_contains($agent, 'ipod')) {
             $platform = 'ipod';
-        } elseif (strpos($agent, 'ipad')) {
+        } elseif (str_contains($agent, 'ipad')) {
             $platform = 'ipad';
-        } elseif (strpos($agent, 'iphone')) {
+        } elseif (str_contains($agent, 'iphone')) {
             $platform = 'iphone';
-        } elseif (strpos($agent, 'android')) {
+        } elseif (str_contains($agent, 'android')) {
             $platform = 'android';
-        } elseif (strpos($agent, 'unix')) {
+        } elseif (str_contains($agent, 'unix')) {
             $platform = 'unix';
-        } elseif (strpos($agent, 'linux')) {
+        } elseif (str_contains($agent, 'linux')) {
             $platform = 'linux';
         } else {
             $platform = 'other';

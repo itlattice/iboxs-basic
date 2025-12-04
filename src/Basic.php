@@ -49,6 +49,8 @@ use iboxs\basic\lib\Base;
  * @method static bool is_ip($str) 判断字符串是否是IP地址（支持IPv6）
  * @method static bool isEmpty($val) 判断是否是空值
  * @method static string GetPage($url) 模拟浏览器获取页面源码
+ * @method static bool isMobileBrowser() 判断用户是否来自手机浏览器
+ * @method static bool isAlipayWeb()  判断用户是否来自支付宝浏览器
  */
 class Basic
 {

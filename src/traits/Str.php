@@ -446,7 +446,7 @@ trait Str
     public function time_format($time = NULL, $format = 'Y-m-d H:i:s')
     {
         $usec = $time = $time === null ? '' : $time;
-        if (strpos($time, '.') !== false) {
+        if (str_contains($time, '.')) {
             list($usec, $sec) = explode(".", $time);
         } else {
             $sec = 0;
@@ -605,8 +605,18 @@ trait Str
      */
     public function is_domain($domain)
     {
-        return !empty($domain) && strpos($domain, '--') === false &&
+        return !empty($domain) && (str_contains($domain, '--') === false) &&
         preg_match('/^([a-z0-9]+([a-z0-9-]*(?:[a-z0-9]+))?\.)?[a-z0-9]+([a-z0-9-]*(?:[a-z0-9]+))?(\.us|\.tv|\.org\.cn|\.org|\.net\.cn|\.net|\.mobi|\.me|\.la|\.info|\.hk|\.gov\.cn|\.edu|\.com\.cn|\.com|\.co\.jp|\.co|\.cn|\.cc|\.biz)$/i', $domain) ? true : false;
+    }
+
+    /**
+     * 转驼峰
+     */
+    public function toPascalCase($string) {
+        // 转换为小驼峰
+        $camelCase = str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $string))));
+        // 确保第一个单词首字母大写
+        return ucfirst($camelCase);
     }
 
     /**
@@ -637,5 +647,85 @@ trait Str
             return true;
         }
         return false;
+    }
+
+    public function splitName($fullname){
+        $hyphenated = array('欧阳','太史','端木','上官','司马','东方','独孤','南宫','万俟','闻人','夏侯','诸葛','尉迟','公羊','赫连','澹台','皇甫',
+            '宗政','濮阳','公冶','太叔','申屠','公孙','慕容','仲孙','钟离','长孙','宇文','城池','司徒','鲜于','司空','汝嫣','闾丘','子车','亓官',
+            '司寇','巫马','公西','颛孙','壤驷','公良','漆雕','乐正','宰父','谷梁','拓跋','夹谷','轩辕','令狐','段干','百里','呼延','东郭','南门',
+            '羊舌','微生','公户','公玉','公仪','梁丘','公仲','公上','公门','公山','公坚','左丘','公伯','西门','公祖','第五','公乘','贯丘','公皙',
+            '南荣','东里','东宫','仲长','子书','子桑','即墨','达奚','褚师');
+        $vLength = mb_strlen($fullname, 'utf-8');
+        $lastname = '';
+        $firstname = '';//前为姓,后为名
+        if($vLength > 2){
+            $preTwoWords = mb_substr($fullname, 0, 2, 'utf-8');//取命名的前两个字,看是否在复姓库中
+            if(in_array($preTwoWords, $hyphenated)){
+                $lastname = $preTwoWords;
+                $firstname = mb_substr($fullname, 2, 10, 'utf-8');
+            }else{
+                $lastname = mb_substr($fullname, 0, 1, 'utf-8');
+                $firstname = mb_substr($fullname, 1, 10, 'utf-8');
+            }
+        }else if($vLength == 2){//全名只有两个字时,以前一个为姓,后一下为名
+            $lastname = mb_substr($fullname ,0, 1, 'utf-8');
+            $firstname = mb_substr($fullname, 1, 10, 'utf-8');
+        }else{
+            $lastname = $fullname;
+        }
+        return array($lastname, $firstname);
+    }
+
+    /**
+     * 混淆数字
+     */
+    public function dec2FactString($id) {
+        $sid = ($id & 0xff000000);
+        $sid += ($id & 0x0000ff00) << 8;
+        $sid += ($id & 0x00ff0000) >> 8;
+        $sid += ($id & 0x0000000f) << 4;
+        $sid += ($id & 0x000000f0) >> 4;
+        $sid ^= 11184810;
+        return $sid;
+    }
+    
+    /**
+     * 解密数字
+     */
+    function factString2Dec($sid) {
+        if (!is_numeric($sid)) {
+            return false;
+        }
+        $sid ^= 11184810;
+        $id = ($sid & 0xff000000);
+        $id += ($sid & 0x00ff0000) >> 8;
+        $id += ($sid & 0x0000ff00) << 8;
+        $id += ($sid & 0x000000f0) >> 4;
+        $id += ($sid & 0x0000000f) << 4;
+        return $id;
+    }
+
+    public function humanizeDateTime($timestamp) {
+        $now = new DateTime();
+        $date = new DateTime('@' . $timestamp+8*3600);
+    
+        $interval = $now->diff($date);
+    
+        if ($interval->d == 0) {
+            // 今天
+            return '今天 ' . $date->format('H:i');
+        } elseif ($interval->d == 1) {
+            // 明天
+            return '明天 ' . $date->format('H:i');
+        } elseif ($interval->d == -1) {
+            // 昨天
+            return '昨天 ' . $date->format('H:i');
+        } elseif ($interval->y == 0) {
+            // 今年
+            return $date->format('m-d H:i');
+        } else {
+            // 其他年份
+            return $date->format('Y-m-d H:i');
+        }
     }
 }
