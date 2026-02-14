@@ -1,35 +1,308 @@
 <?php
-namespace iboxs\basic\traits;
+namespace iboxs\basic\lib\helper;
 
 use DateTime;
 use DateTimeZone;
-trait Str
-{
+
+class Helper{
+    /**
+     * 获取域名中的顶级域名
+     * @param string $url 需要解析的URL地址
+     * @return string 返回解析后的顶级域名
+     */
+    public function getTopDomain(string $url):string{
+        $url = strtolower($url);
+        $hosts = parse_url($url);
+        $host = $hosts['host'];
+        $data = explode('.', $host);
+        $n = count($data);
+        $preg = '/[\w].+\.(com|net|org|gov|edu)\.cn$/';
+        if (($n > 2) && preg_match($preg, $host)) {
+            $host = $data[$n - 3] . '.' . $data[$n - 2] . '.' . $data[$n - 1];
+        } else {
+            $host = $data[$n - 2] . '.' . $data[$n - 1];
+        }
+        return $host;
+    }
+
+    /**
+     * 判断请求是否来自微信浏览器
+     * @return bool 如果请求来自微信浏览器则返回true，否则返回false
+     */
+    public function isWechatBrowser():bool{
+        if (str_contains($_SERVER['HTTP_USER_AGENT'] ?? '', 'MicroMessenger') !== false) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断请求是否来自支付宝浏览器
+     * @return bool 如果请求来自支付宝浏览器则返回true，否则返回false
+     */
+    public function isAlipayBrowser():bool{
+        if (str_contains($_SERVER['HTTP_USER_AGENT'] ?? '', 'AlipayClient') !== false) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断请求是否来自移动设备
+     * @return bool 如果请求来自移动设备则返回true，否则返回false
+     */
+    public function isMobile():bool{
+        $userAgent =$_SERVER['HTTP_USER_AGENT'] ?? '';
+        $mobileDevices = [
+            '/android/i',
+            '/webos/i',
+            '/iphone/i',
+            '/ipad/i',
+            '/ipod/i',
+            '/blackberry/i',
+            '/iemobile/i',
+            '/opera mini/i',
+            '/mobile/i'
+        ];
+    
+        foreach ($mobileDevices as $device) {
+            if (preg_match($device, $userAgent)) {
+                return true;
+            }
+        }
+    
+        return false;
+    }
+
+    /**
+     * 获取浏览器语言
+     * @return string 返回浏览器语言的字符串表示
+     */
+    public function getBrowserLang(){
+        $agent =$_SERVER['HTTP_USER_AGENT'] ?? '';
+        if (!empty($agent)) {
+            $lang = strtolower($agent);
+            $lang = substr($lang, 0, 5);
+            if (preg_match('/zh-cn/i', $lang)) {
+                $lang = '简体中文';
+            } else if (preg_match('/zh/i', $lang)) {
+                $lang = '繁体中文';
+            } else {
+                $lang = 'English';
+            }
+            return $lang;
+        } else {
+            return 'unknow';
+        }
+    }
+
+    /**
+     * 获取访客的操作系统
+     * @return string 返回访客操作系统的字符串表示
+     */
+    public function getOS(){
+        $agent =$_SERVER['HTTP_USER_AGENT'] ?? '';
+        $agent = strtolower($agent);
+        if (str_contains($agent, 'windows nt')) {
+            $platform = 'windows';
+        } elseif (str_contains($agent, 'macintosh')) {
+            $platform = 'mac';
+        } elseif (str_contains($agent, 'ipod')) {
+            $platform = 'ipod';
+        } elseif (str_contains($agent, 'ipad')) {
+            $platform = 'ipad';
+        } elseif (str_contains($agent, 'iphone')) {
+            $platform = 'iphone';
+        } elseif (str_contains($agent, 'android')) {
+            $platform = 'android';
+        } elseif (str_contains($agent, 'unix')) {
+            $platform = 'unix';
+        } elseif (str_contains($agent, 'linux')) {
+            $platform = 'linux';
+        } else {
+            $platform = 'other';
+        }
+        return $platform;
+    }
+    /**
+     * 获取浏览器agent
+     * @return mixed|string
+     */
+    public function GetUserAgent()
+    {
+        return $_SERVER['HTTP_USER_AGENT'] ?? '';
+    }
+    /**
+     * 获得访问者浏览器
+     */
+    function GetBrowser()
+    {
+        $agent =$_SERVER['HTTP_USER_AGENT'] ?? '';
+        if (!empty($agent)) {
+            $br = $agent;
+            if (preg_match('/MSIE/i', $br)) {
+                return 'MSIE';
+            } else if (preg_match('/Firefox/i', $br)) {
+                return 'Firefox';
+            } else if (preg_match('/Chrome/i', $br)) {
+                return 'Chrome';
+            } else if (preg_match('/Safari/i', $br)) {
+                return 'Safari';
+            } else if (preg_match('/Opera/i', $br)) {
+                return 'Opera';
+            } else {
+                return 'Other';
+            }
+            return $br;
+        } else {
+            return 'unknow';
+        }
+    }
+    /**
+     * 对象转Array
+     * @param $array
+     * @return array|mixed
+     */
+    public function objectToArray($array)
+    {
+        if (is_object($array)) {
+            $array = (array)$array;
+        }
+        if (is_array($array)) {
+            foreach ($array as $key => $value) {
+                $array[$key] =$this-> objectToArray($value);
+            }
+        }
+        return $array;
+    }
+    /**
+     * 图片base64解码
+     * @param string $base64_image_content 图片文件流
+     * @param bool $save_img 是否保存图片
+     * @param string $path 文件保存路径
+     * @return bool|string
+     */
+    public function imgBase64Decode(string $base64_image_content = '', bool $save_img = false, string $file_path = '')
+    {
+        if (empty($base64_image_content)) {
+            return false;
+        }
+
+        //匹配出图片的信息
+        $match = preg_match('/^(data:\s*image\/(\w+);base64,)/', $base64_image_content, $result);
+        if (!$match) {
+            return false;
+        }
+
+        $base64_image = str_replace($result[1], '', $base64_image_content);
+        $file_content = base64_decode($base64_image);
+        $file_type = $result[2];
+
+        //如果不保存文件,直接返回图片内容
+        if (!$save_img) {
+            return $file_content;
+        }
+
+        $file_name = microtime(true) . ".{$file_type}";
+        $new_file = $file_path . $file_name;
+        if (file_exists($new_file)) {
+            //有同名文件删除
+            @unlink($new_file);
+        }
+        if (file_put_contents($new_file, $file_content)) {
+            return $new_file;
+        }
+        return false;
+    }
+
+    /**
+     * 加锁写入文件
+     * @param string $file 文件路径
+     * @param string $text 字符串
+     * @param string $mode 写入方式
+     * @param int $timeout 最长等待时间
+     * @return bool
+     */
+    public function fileWrite(string $file, string $text, string $mode = 'a+', int $timeout = 5): bool
+    {
+        $handle = fopen($file, $mode);
+        while ($timeout > 0) {
+            if (!is_writable($file)) {
+                $timeout--;
+                sleep(1);
+            } else {
+                flock($handle, LOCK_EX);
+                fwrite($handle, $text);
+                flock($handle, LOCK_UN);
+                fclose($handle);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取文件扩展名
+     * @param string $file 文件路径
+     * @return string 返回文件的扩展名
+     */
+    public function getFileExt(string $file): string{
+        $ext = pathinfo($file, PATHINFO_EXTENSION);
+        return $ext;
+    }
+    /**
+     * 获取服务器信息
+     * @param string $key 项
+     * @return array|mixed
+     */
+    public function getSystemInfo(string $key='')
+    {
+        $system = [
+            'os' => PHP_OS,
+            'version' => PHP_VERSION,
+            'upload_max_filesize' => get_cfg_var("upload_max_filesize") ? get_cfg_var("upload_max_filesize") : 0,
+            'max_execution_time' => get_cfg_var("max_execution_time")
+        ];
+        if (empty($key)) {
+            return $system;
+        } else {
+            return $system[$key];
+        }
+    }
+
     /**
      * 判断字符串是否是JSON
+     * @param string $str 需要判断的字符串
+     * @return bool 如果字符串是JSON格式则返回true，否则返回false
      */
-    public function isJson($str){
+    public function isJson(string $str): bool{
         return (!is_null(json_decode($str)));
     }
+
     /**
      * 获取随机字符串
      * @param int $length 随机字符串长度
      * @return string
      */
-    public function GetRandStr(int $length = 8): string
+    public function GetRandomStr(int $length = 8): string
     {
         //字符组合
         $str = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $len = strlen($str) - 1;
         $randStr = '';
         for ($i = 0; $i < $length; $i++) {
-            $num = mt_rand(0, $len);
+            $num = \mt_rand(0, $len);
             $randStr .= $str[$num];
         }
         return $randStr;
     }
 
-    public function delEmoji($str){
+    /**
+     * 删除字符串中的emoji表情
+     * @param string|array $str 需要处理的字符串或字符串数组
+     * @return string|array 处理后的字符串或字符串数组
+     */
+    public function DelEmoji(string|array $str): string|array{
         if(is_array($str)){
             foreach($str as $key=>$val){
                 $str[$key] = $this->delEmoji($val);
@@ -52,8 +325,13 @@ trait Str
         return mb_convert_encoding($str, "UTF-8");
     }
 
-
-    public function sameStr($str1,$str2){
+    /**
+     * 计算两个字符串的相同长度
+      * @param string $str1 第一个字符串
+      * @param string $str2 第二个字符串
+       * @return int 返回两个字符串的相同长度
+     */
+    public function sameStr(string $str1, string $str2): int{
         $len=mb_strlen($str1);
         $count=0;
         for($i=1;$i<$len+1;$i++){
@@ -64,7 +342,12 @@ trait Str
         return $count;
     }
 
-    public function phoneHandle($mobile){
+    /**
+     * 处理手机号，隐藏中间4位
+    * @param string $mobile 需要处理的手机号字符串
+    * @return string 返回处理后的手机号字符串
+     */
+    public function phoneHandle(string $mobile): string{
         if(strlen($mobile)<8){
             return substr($mobile,0,3)."**";
         }
@@ -74,8 +357,12 @@ trait Str
         $center=str_pad('',$len,'*');
         return $head.$center.$foot;
     }
-
-    public function isDate($date)
+    /**
+     * 判断字符串是否为空
+     * @param string $str 需要判断的字符串
+     * @return bool 如果字符串为空则返回true，否则返回false
+     */
+    public function isDate(string $date): bool
     {
         //匹配日期格式
         if (preg_match ("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date, $parts))
@@ -90,7 +377,15 @@ trait Str
             return false;
     }
 
-    public function chunkSplit($string, $length, $end="\n", $once = false){
+    /**
+     * PHP截取文字长度
+     * @param string $string 需要截取的字符串
+     * @param int $length 需要截取的长度
+     * @param string $end 截取后字符串末尾添加的字符串，默认为换行符
+     * @param bool $once 是否只截取一次，默认为false，如果为true则只截取一次并返回结果
+      * @return string 返回截取后的字符串
+     */
+    public function chunkSplit(string $string, int $length, string $end="\n", bool $once = false): string{
         $array = array();
         $strlen = mb_strlen($string);
         while($strlen){
@@ -108,7 +403,7 @@ trait Str
      * @param mixed $data 需判断的字符串
      * @return bool
      */
-    public function isSerialized($data): bool
+    public function isSerialized(string $data): bool
     {
         if (!is_string($data)) {
             return false;
@@ -135,7 +430,12 @@ trait Str
         return false;
     }
 
-    public function isChinesePhone($str): bool
+    /**
+     * 判断字符串是否是手机号
+     * @param string $str 字符串
+     * @return bool
+     */
+    public function isChinesePhone(string $str): bool
     {
         if($this->isEmpty($str)){
             return false;
@@ -212,40 +512,14 @@ trait Str
         }
     }
 
-    /**
-     * 判断字符串结尾是否是相关字符(PHP8.0可直接使用str_ends_with()函数)
-     * @param string $str 原字符串
-     * @param string $search 结尾字符串
-     * @return bool
-     */
-    public function endWith(string $str, string $search): bool
-    {
-        if (strlen($search) > strlen($str)) {
-            return false;
-        }
-        return substr($str, strlen($str) - strlen($search), strlen($search)) == $search;
-    }
 
-    /**
-     * 判断字符串开头
-     * @param string $str 字符串
-     * @param string $search 需判断的开头字符串
-     * @return bool
-     */
-    public function startWith(string $str, string $search): bool
-    {
-        if (strlen($search) > strlen($str)) {
-            return false;
-        }
-        return substr($str, 0, strlen($search)) == $search;
-    }
-
+    
     /**
      * 将版本号转为数字
-     * @param $ver 版本号
-     * @return string
+     * @param string $ver 版本号
+     * @return float 返回转换后的版本号数字
      */
-    public function GetVerId($ver)
+    public function GetVerId(string $ver): float
     {
         $ver = str_replace("v", "", $ver);
         $ver = str_replace("V", "", $ver);
@@ -277,7 +551,7 @@ trait Str
             }
             $kstr.='.'.$k;
         }
-        return $kstr;
+        return floatval($kstr);
     }
 
     /**
@@ -285,7 +559,7 @@ trait Str
      * @param $str
      * @return bool
      */
-    public function isIdCard($str)
+    public function isIdCard(string $str): bool
     {
         $vCity = array(
             '11', '12', '13', '14', '15', '21', '22',
@@ -315,8 +589,12 @@ trait Str
         return true;
     }
 
-    public function create_uuid() {
-        $chars = md5(uniqid(mt_rand(), true));
+    /**
+     * 生成一个UUID字符串
+     * @return string
+     */
+    public function createUUID() {
+        $chars = md5(uniqid(\mt_rand(), true));
         $uuid = substr ( $chars, 0, 8 ) . '-'
             . substr ( $chars, 8, 4 ) . '-'
             . substr ( $chars, 12, 4 ) . '-'
@@ -326,31 +604,10 @@ trait Str
     }
 
     /**
-     * 下载文件
-     * @param $file_url 下载地址
-     * @param $save_to 保存位置+文件名称
-     * @return void
-     */
-    public function downLoadFile($file_url, $save_to,$header=[])
-    {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_POST, 0);
-        curl_setopt($ch, CURLOPT_URL, $file_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        // curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        $file_content = curl_exec($ch);
-        curl_close($ch);
-        $downloaded_file = fopen($save_to, 'w');
-        fwrite($downloaded_file, $file_content);
-        fclose($downloaded_file);
-    }
-
-    /**
      * 获取客户端IP
      * @return mixed|string
      */
-    public function GetIP()
+    public function getClientIp(): string
     {
         $ip = FALSE;
         //客户端IP 或 NONE
@@ -379,7 +636,7 @@ trait Str
      * 生成一个不会重复的字符串
      * @return string
      */
-    public function make_token()
+    public function makeToken(): string
     {
         $str = md5(uniqid(md5(microtime(true)), true));
         $str = sha1($str); //加密
@@ -392,18 +649,18 @@ trait Str
      * @param $salt 加密盐
      * @return string
      */
-    public function set_password($pwd, $salt)
+    public function PasswordSalt(string $pwd, string $salt): string
     {
         return md5(md5($pwd . $salt) . $salt);
     }
 
     /**
      * PHP格式化字节大小
-     * @param mixed $size 字节数
+     * @param float $size 字节数
      * @param string $delimiter 数字和单位分隔符
      * @return string            格式化后的带单位的大小
      */
-    function format_bytes($size, $delimiter = '')
+    public function formatBytes(float $size, string $delimiter = ''): string
     {
         $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
         for ($i = 0; $size >= 1024 && $i < 5; $i++) {
@@ -413,37 +670,22 @@ trait Str
     }
 
     /**
-     * PHP截取文字长度
-     * @return string
-     */
-   public function sub_str($str, $len = 20)
-    {
-        $strlen = strlen($str) / 3;#在编码utf8下计算字符串的长度，并把它交给变量$strlen
-        #echo $strlen;#输出字符串长度
-        if ($strlen < $len) {
-            return $str;
-        } else {
-            return mb_substr($str, 0, $len, "utf-8") . "...";
-        }
-    }
-
-    /**
      * 将数字转为两位小数字符串
-     * @param $value 数字
+     * @param float $value 数字
      * @return string
      */
-    public function fix2($value)
+    public function fix(float $value,int $decimals = 2): string
     {
-        return sprintf('%.2f', $value);
+        return sprintf('%.' . $decimals . 'f', $value);
     }
-
+    
     /**
      * 时间戳格式化
      * @param int $time
-     * @param string $format 默认'Y-m-d H:i'，x代表毫秒
+     * @param string $format 默认'Y-m-d H:i:s'，x代表毫秒
      * @return string 完整的时间显示
      */
-    public function time_format($time = NULL, $format = 'Y-m-d H:i:s')
+    public function timeFormat(int $time = NULL, $format = 'Y-m-d H:i:s')
     {
         $usec = $time = $time === null ? '' : $time;
         if (str_contains($time, '.')) {
@@ -456,11 +698,11 @@ trait Str
 
     /**
      * 字符串转时间
-     * @param $string
-     * @param $timeZone
+     * @param string $string
+     * @param DateTimeZone|null $timeZone
      * @return DateTime
      */
-    public function parseDateTime($string, $timeZone = null)
+    public function parseDateTime(string $string, ?DateTimeZone $timeZone = null): DateTime
     {
         $date = new DateTime(
             $string,
@@ -475,10 +717,10 @@ trait Str
 
     /**
      * 字符串转日期
-     * @param $datetime
+     * @param DateTime $datetime
      * @return DateTime
      */
-    public function stripTime($datetime)
+    public function stripTime(DateTime $datetime): DateTime
     {
         return new DateTime($datetime->format('Y-m-d'));
     }
@@ -489,7 +731,7 @@ trait Str
      * @param string $format 格式 【d：显示到天 i显示到分钟 s显示到秒】
      * @return string
      */
-    public function time_trans($time, $format = 'd')
+    public function timeTrans(int $time, string $format = 'd'): string
     {
         $now = time();
         $diff = $now - $time;
@@ -555,10 +797,10 @@ trait Str
 
     /**
      * 判断字符串是否是URL
-     * @param $str
+     * @param string $str
      * @return bool
      */
-    public function isUrl($str)
+    public function isUrl(string $str): bool
     {
         if (filter_var($str, FILTER_VALIDATE_URL) !== false) {
             return true;
@@ -571,7 +813,7 @@ trait Str
      * @param $ip
      * @return float|int
      */
-    public function ipton($ip)
+    public function ipton(string $ip): float|int
     {
         $ip_arr = explode('.', $ip);//分隔ip段
         $ipstr = '';
@@ -592,10 +834,10 @@ trait Str
      * @param $email
      * @return false|int
      */
-    public function isEmail($email)
+    public function isEmail(string $email): bool
     {
         $pattern_test = "/([a-z0-9]*[-_.]?[a-z0-9]+)*@([a-z0-9]*[-_]?[a-z0-9]+)+[.][a-z]{2,3}([.][a-z]{2})?/i";
-        return preg_match($pattern_test, $email);
+        return preg_match($pattern_test, $email) === 1;
     }
 
     /**
@@ -603,7 +845,7 @@ trait Str
      * @param $domain
      * @return bool
      */
-    public function is_domain($domain)
+    public function isDomain(string $domain): bool
     {
         return !empty($domain) && (str_contains($domain, '--') === false) &&
         preg_match('/^([a-z0-9]+([a-z0-9-]*(?:[a-z0-9]+))?\.)?[a-z0-9]+([a-z0-9-]*(?:[a-z0-9]+))?(\.us|\.tv|\.org\.cn|\.org|\.net\.cn|\.net|\.mobi|\.me|\.la|\.info|\.hk|\.gov\.cn|\.edu|\.com\.cn|\.com|\.co\.jp|\.co|\.cn|\.cc|\.biz)$/i', $domain) ? true : false;
@@ -612,7 +854,7 @@ trait Str
     /**
      * 转驼峰
      */
-    public function toPascalCase($string) {
+    public function toPascalCase(string $string): string {
         // 转换为小驼峰
         $camelCase = str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $string))));
         // 确保第一个单词首字母大写
@@ -620,11 +862,21 @@ trait Str
     }
 
     /**
+     * 大驼峰转为下划线
+     */
+    public function toSnakeCase($string) {
+        // 转换为小驼峰
+        $camelCase = str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $string))));
+        // 转换为下划线
+        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $camelCase));
+    }
+
+    /**
      * 判断字符串是否是IP地址（支持IPv6）
      * @param $str
      * @return bool
      */
-    public function is_ip($str)
+    public function isIP(string $str): bool
     {
         if (filter_var($str, FILTER_VALIDATE_IP)) {
             return true;
@@ -633,7 +885,12 @@ trait Str
         }
     }
 
-    public function isEmpty($value){
+    /**
+     * 判断是否为空
+      * @param mixed $value 需要判断的值
+      * @return bool 如果值为空则返回true，否则返回false
+     */
+    public function isEmpty(mixed $value): bool {
         if($value===null){
             return true;
         }
@@ -649,7 +906,12 @@ trait Str
         return false;
     }
 
-    public function splitName($fullname){
+    /**
+     * 获取姓名中的姓氏和名字
+     * @param string $fullname 全名
+     * @return array 包含姓氏和名字的数组，前一个元素为姓，后一个元素为名
+     */
+    public function splitName(string $fullname): array {
         $hyphenated = array('欧阳','太史','端木','上官','司马','东方','独孤','南宫','万俟','闻人','夏侯','诸葛','尉迟','公羊','赫连','澹台','皇甫',
             '宗政','濮阳','公冶','太叔','申屠','公孙','慕容','仲孙','钟离','长孙','宇文','城池','司徒','鲜于','司空','汝嫣','闾丘','子车','亓官',
             '司寇','巫马','公西','颛孙','壤驷','公良','漆雕','乐正','宰父','谷梁','拓跋','夹谷','轩辕','令狐','段干','百里','呼延','东郭','南门',
@@ -677,35 +939,11 @@ trait Str
     }
 
     /**
-     * 混淆数字
+     * 将时间戳转换为人类可读的日期时间格式
+     * @param int $timestamp 需要转换的时间戳
+     * @return string 人类可读的日期时间格式
      */
-    public function dec2FactString($id) {
-        $sid = ($id & 0xff000000);
-        $sid += ($id & 0x0000ff00) << 8;
-        $sid += ($id & 0x00ff0000) >> 8;
-        $sid += ($id & 0x0000000f) << 4;
-        $sid += ($id & 0x000000f0) >> 4;
-        $sid ^= 11184810;
-        return $sid;
-    }
-    
-    /**
-     * 解密数字
-     */
-    function factString2Dec($sid) {
-        if (!is_numeric($sid)) {
-            return false;
-        }
-        $sid ^= 11184810;
-        $id = ($sid & 0xff000000);
-        $id += ($sid & 0x00ff0000) >> 8;
-        $id += ($sid & 0x0000ff00) << 8;
-        $id += ($sid & 0x000000f0) >> 4;
-        $id += ($sid & 0x0000000f) << 4;
-        return $id;
-    }
-
-    public function humanizeDateTime($timestamp) {
+    public function humanizeDateTime(int $timestamp): string {
         $now = new DateTime();
         $date = new DateTime('@' . $timestamp+8*3600);
     
