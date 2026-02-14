@@ -18,6 +18,9 @@
     "autoload": {
         "psr-4": {
             "iboxs\\basic\\": "src/"
-        }
+        },
+        "files": [
+            "src/common.php"
+        ]
     }
 }

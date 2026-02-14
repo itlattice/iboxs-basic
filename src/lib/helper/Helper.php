@@ -966,4 +966,85 @@ class Helper{
             return $date->format('Y-m-d H:i');
         }
     }
+
+    /**
+     * 判断字符串是否是HTTP URL
+     * @param string $url 需要判断的字符串
+     * @return bool 如果是HTTP URL则返回true，否则返回false
+     */
+    public function isHttp(string $url): bool {
+        $head=substr($url,0,7);
+        if($head=='http://'||$head=='https:/'){
+            return true;
+        }
+        $info=parse_url($url);
+        if(isset($info['host'])){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 生成一个指定长度的随机数字字符串
+     * @param int $length 随机数字字符串的长度，默认为2
+     * @return string 生成的随机数字字符串
+     */
+    public function randIntStr($length=2){
+        $str = '0123456789';
+        $len = strlen($str) - 1;
+        $randStr = '';
+        for ($i = 0; $i < $length; $i++) {
+            $num = mt_rand(0, $len);
+            $randStr .= $str[$num];
+        }
+        return $randStr;
+    }
+
+    /**
+     * 将字符串转换为大驼峰命名法（PascalCase）
+     * @param string $string 需要转换的字符串
+     * @return string 转换后的大驼峰命名法字符串
+     */
+    public function toWordPascalCase($string) {
+        // 使用正则表达式将非字母数字字符替换为空格
+        $string = preg_replace('/[^a-zA-Z0-9]+/', ' ', $string);
+        // 将字符串转换为小写
+        $string = strtolower($string);
+        // 将每个单词的首字母大写
+        $string = ucwords($string);
+        // 移除空格
+        $string = str_replace(' ', '', $string);
+        return $string;
+    }
+
+    // 定义一个函数将蛇形命名转换为大驼峰命名
+    public function SnakeToPascalCase(string $value): string
+    {
+        // 将下划线或短横线替换为空格
+        $value = str_replace(['_', '-'], ' ', $value);
+        
+        // 使用ucwords将每个单词的首字母转为大写
+        $value = ucwords($value);
+        
+        // 去除空格并将字符串转为大写
+        $value = str_replace(' ', '', $value);
+
+        return $value;
+    }
+
+    public function isBinaryString(string $string): bool {
+        return preg_match('~[^\x20-\x7E\t\r\n]~', $string) > 0;
+    }
+
+    
+    public function putFile($file,$content){
+        $f=fopen($file,'wb');
+        if(!$f){
+            return false;
+        }
+        fwrite($f,$content);
+        fclose($f);
+        return true;
+    }
+
 }

@@ -57,6 +57,12 @@ use iboxs\basic\lib\http\Http;
  * @method static bool isEmpty(mixed $value) 判断值是否为空
  * @method static array splitName(string $fullname) 获取中文姓名中的姓氏和名字
  * @method static string humanizeDateTime(int $timestamp) 将时间戳转换为人类可读的日期时间格式
+ * @method static bool isHttp(string $url) 判断字符串是否是HTTP或HTTPS URL
+ * @method static string toWordPascalCase(string $string) 将字符串转换为单词大驼峰格式
+ * @method static string randIntStr(int $length = 2) 生成一个指定长度的随机数字字符串
+ * @method static string SnakeToPascalCase(string $string) 将蛇形命名转换为大驼峰命名
+ * @method static bool isBinaryString(string $string) 判断字符串是否为二进制字符串
+ * @method static bool putFile(string $file_path, string $content) 将内容写入文件
  */
 class Basic
 {
