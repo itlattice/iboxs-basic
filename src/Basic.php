@@ -10,6 +10,7 @@ use iboxs\basic\lib\http\Http;
 
 /**
  * @package iboxs\basic
+ * @method static Http Http() Http请求方法
  * @method static string getTopDomain(string $url) 获取域名中的顶级域名
  * @method static bool isWechatBrowser() 判断请求是否来自微信浏览器
  * @method static bool isAlipayBrowser() 判断请求是否来自支付宝浏览器
