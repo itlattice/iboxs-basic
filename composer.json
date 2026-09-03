@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=7.0",
+        "php": ">=8.0",
         "ext-mbstring": "*",
         "ext-json": "*",
         "ext-curl": "*"
@@ -18,6 +18,9 @@
     "autoload": {
         "psr-4": {
             "iboxs\\basic\\": "src/"
-        }
+        },
+        "files": [
+            "src/common.php"
+        ]
     }
 }
