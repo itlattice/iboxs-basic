@@ -5,12 +5,14 @@
  */
 namespace iboxs\basic;
 
+use iboxs\basic\lib\encryption\Encryption;
 use iboxs\basic\lib\helper\Helper;
 use iboxs\basic\lib\http\Http;
 
 /**
  * @package iboxs\basic
- * @method static Http Http() Http请求方法
+ * @method static Http Http(string $url,string $format=self::HTTP_FORMAT_JSON) Http请求方法
+ * @method static Encryption Encryption(string $string) 字符串加解密方法
  * @method static string getTopDomain(string $url) 获取域名中的顶级域名
  * @method static bool isWechatBrowser() 判断请求是否来自微信浏览器
  * @method static bool isAlipayBrowser() 判断请求是否来自支付宝浏览器
@@ -63,6 +65,7 @@ use iboxs\basic\lib\http\Http;
  * @method static string SnakeToPascalCase(string $string) 将蛇形命名转换为大驼峰命名
  * @method static bool isBinaryString(string $string) 判断字符串是否为二进制字符串
  * @method static bool putFile(string $file_path, string $content) 将内容写入文件
+ * @method static Http Http(string $url, string $format = self::HTTP_FORMAT_JSON) 创建一个HTTP请求实例
  */
 class Basic
 {
@@ -82,5 +85,9 @@ class Basic
 
     public static function Http(string $url,string $format=self::HTTP_FORMAT_JSON):Http{
         return new Http($url,$format);
+    }
+
+    public static function Encryption(string $url):Encryption{
+        return new Encryption($url);
     }
 }

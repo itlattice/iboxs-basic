@@ -403,9 +403,12 @@ class Helper{
      * @param mixed $data 需判断的字符串
      * @return bool
      */
-    public function isSerialized(string $data): bool
+    public function isSerialized(?string $data): bool
     {
         if (!is_string($data)) {
+            return false;
+        }
+        if($this->isEmpty($data)){
             return false;
         }
         $data = trim($data);
@@ -898,7 +901,7 @@ class Helper{
             return false;
         }
         if(is_array($value)){
-            return false;
+            return count($value)==0;
         }
         if(is_string($value)&&$value==''){
             return true;
