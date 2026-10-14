@@ -24,6 +24,17 @@ if(!function_exists('jsonEncode')){
     }
 }
 
+if(!function_exists('jsonDecode')){
+    /**
+     * 将JSON字符串解码为PHP数据
+     * @param string $value 需要解码的JSON字符串
+     * @return mixed 返回解码后的PHP数据
+     */
+    function jsonDecode($value){
+        return json_decode($value,true);
+    }
+}
+
 if(!function_exists('randInt')){
     /**
      * 生成一个指定范围内的随机整数

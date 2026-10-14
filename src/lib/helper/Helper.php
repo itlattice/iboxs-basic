@@ -64,13 +64,13 @@ class Helper{
             '/opera mini/i',
             '/mobile/i'
         ];
-    
+
         foreach ($mobileDevices as $device) {
             if (preg_match($device, $userAgent)) {
                 return true;
             }
         }
-    
+
         return false;
     }
 
@@ -302,7 +302,10 @@ class Helper{
      * @param string|array $str 需要处理的字符串或字符串数组
      * @return string|array 处理后的字符串或字符串数组
      */
-    public function DelEmoji(string|array $str): string|array{
+    public function DelEmoji(mixed $str): string|array{
+        if(is_null($str)){
+            return '';
+        }
         if(is_array($str)){
             foreach($str as $key=>$val){
                 $str[$key] = $this->delEmoji($val);
@@ -320,7 +323,7 @@ class Helper{
         }
         $mbLen = mb_strlen($str); $strArr = [];
         for ($i = 0; $i < $mbLen; $i++) { $mbSubstr = mb_substr($str, $i, 1, 'utf-8');
-        if (strlen($mbSubstr) >= 4) { continue; } $strArr[] = $mbSubstr; } 
+        if (strlen($mbSubstr) >= 4) { continue; } $strArr[] = $mbSubstr; }
         $str=implode('', $strArr);
         return mb_convert_encoding($str, "UTF-8");
     }
@@ -347,7 +350,10 @@ class Helper{
     * @param string $mobile 需要处理的手机号字符串
     * @return string 返回处理后的手机号字符串
      */
-    public function phoneHandle(string $mobile): string{
+    public function phoneHandle(string|null $mobile): string{
+        if($this->isEmpty($mobile)){
+            return '';
+        }
         if(strlen($mobile)<8){
             return substr($mobile,0,3)."**";
         }
@@ -516,7 +522,7 @@ class Helper{
     }
 
 
-    
+
     /**
      * 将版本号转为数字
      * @param string $ver 版本号
@@ -681,7 +687,7 @@ class Helper{
     {
         return sprintf('%.' . $decimals . 'f', $value);
     }
-    
+
     /**
      * 时间戳格式化
      * @param int $time
@@ -949,9 +955,9 @@ class Helper{
     public function humanizeDateTime(int $timestamp): string {
         $now = new DateTime();
         $date = new DateTime('@' . $timestamp+8*3600);
-    
+
         $interval = $now->diff($date);
-    
+
         if ($interval->d == 0) {
             // 今天
             return '今天 ' . $date->format('H:i');
@@ -1025,10 +1031,10 @@ class Helper{
     {
         // 将下划线或短横线替换为空格
         $value = str_replace(['_', '-'], ' ', $value);
-        
+
         // 使用ucwords将每个单词的首字母转为大写
         $value = ucwords($value);
-        
+
         // 去除空格并将字符串转为大写
         $value = str_replace(' ', '', $value);
 
@@ -1039,7 +1045,7 @@ class Helper{
         return preg_match('~[^\x20-\x7E\t\r\n]~', $string) > 0;
     }
 
-    
+
     public function putFile($file,$content){
         $f=fopen($file,'wb');
         if(!$f){
